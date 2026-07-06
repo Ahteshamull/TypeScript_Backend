@@ -48,9 +48,7 @@ router.get('/turn-credentials', async (req, res) => {
       }
     }
     
-    // Fallback: return both self-hosted coturn server and Open Relay Project cloud servers
-    const host = req.get('host')?.split(':')[0] || process.env.PUBLIC_IP || '127.0.0.1';
-    console.log('[TURN] No metered.ca config, returning self-hosted and Open Relay TURN pointing to:', host);
+    // Fallback: return standard Google STUN servers only as requested
     res.json({
       success: true,
       iceServers: [
@@ -58,34 +56,7 @@ router.get('/turn-credentials', async (req, res) => {
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
         { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        // Option 1: Self-hosted TURN (Works if ports are exposed)
-        {
-          urls: `turn:${host}:3478`,
-          username: 'chatuser',
-          credential: 'chatpassword123'
-        },
-        {
-          urls: `turn:${host}:3478?transport=tcp`,
-          username: 'chatuser',
-          credential: 'chatpassword123'
-        },
-        // Option 2: Open Relay Project (Cloud TURN, works without any local port mappings)
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        }
+        { urls: 'stun:stun4.l.google.com:19302' }
       ]
     });
   } catch (error) {

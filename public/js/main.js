@@ -21,7 +21,7 @@ window.isCallConnected = false;
 window.myIsVideoCall = false; // To track if we initiated a video or audio call
 window.callRecorder = null;
 window.recordedChunks = [];
-// Default ICE config (STUN only - will be upgraded with TURN from server)
+// Default ICE config (STUN only as requested)
 window.iceServers = { 
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -31,28 +31,6 @@ window.iceServers = {
         { urls: 'stun:stun4.l.google.com:19302' }
       ] 
     };
-
-// Fetch TURN credentials from server (metered.ca free API)
-window.fetchTurnCredentials = async function() {
-  try {
-    console.log('🔑 [TURN] Fetching TURN credentials from server...');
-    const res = await fetch(`${window.API_URL}/turn-credentials`);
-    const data = await res.json();
-    
-    if (data.success && data.iceServers && data.iceServers.length > 0) {
-      window.iceServers = { iceServers: data.iceServers };
-      const turnCount = data.iceServers.filter(s => s.urls && s.urls.toString().includes('turn')).length;
-      console.log('🔑 [TURN] ✅ Got', data.iceServers.length, 'servers (' + turnCount + ' TURN servers)');
-      if (turnCount === 0) {
-        console.warn('🔑 [TURN] ⚠️ No TURN servers! Calls may fail behind NAT. Add METERED_API_KEY and METERED_APP_NAME to .env');
-      }
-    } else {
-      console.warn('🔑 [TURN] ⚠️ No ICE servers from API, using defaults');
-    }
-  } catch (err) {
-    console.error('🔑 [TURN] ❌ Failed to fetch TURN credentials:', err.message);
-  }
-};
 window.isScreenSharing = false;
 window.screenStream = null;
 window.iceCandidateQueue = [];
