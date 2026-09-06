@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "build": "tsc",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node init && node dist/server.js",
+    "build": "node init && tsc",
+    "dev": "node init && ts-node-dev --respawn --transpile-only src/server.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -26,6 +26,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
     "multer": "^2.2.0",
+    "node-fetch": "^3.3.2",
     "nodemailer": "^9.0.3",
     "socket.io": "^4.8.3",
     "streamifier": "^0.1.1",
