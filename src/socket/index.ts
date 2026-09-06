@@ -183,6 +183,42 @@ export const initSocket = (server: HttpServer) => {
       }
     });
 
+    // WebRTC Signaling
+    socket.on('call_user', ({ receiverId, isVideoCall }: { receiverId: string, isVideoCall: boolean }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('incoming_call', { senderId, isVideoCall });
+    });
+
+    socket.on('answer_call', ({ receiverId }: { receiverId: string }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('call_answered', { senderId });
+    });
+
+    socket.on('call_ringing', ({ receiverId }: { receiverId: string }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('call_ringing', { senderId });
+    });
+
+    socket.on('webrtc_offer', ({ receiverId, offer }: { receiverId: string, offer: any }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('webrtc_offer', { senderId, offer });
+    });
+
+    socket.on('webrtc_answer', ({ receiverId, answer }: { receiverId: string, answer: any }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('webrtc_answer', { senderId, answer });
+    });
+
+    socket.on('webrtc_ice_candidate', ({ receiverId, candidate }: { receiverId: string, candidate: any }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('webrtc_ice_candidate', { senderId, candidate });
+    });
+
+    socket.on('end_call', ({ receiverId }: { receiverId: string }) => {
+      const senderId = socket.data.user.userId.toString();
+      socket.to(receiverId).emit('end_call', { senderId });
+    });
+
     // 7. Message Delivery & Read Receipts (Seen)
     socket.on('mark_delivered', async ({ messageId, senderId }: { messageId: string; senderId: string }) => {
       try {
@@ -341,7 +377,6 @@ export const initSocket = (server: HttpServer) => {
       }
     );
 
-    // 10. Disconnect & Presence Cleanup
     socket.on('disconnect', () => {
       console.log(`Socket disconnected: User ${userId} (Socket: ${socket.id})`);
 

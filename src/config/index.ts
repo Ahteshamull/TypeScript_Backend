@@ -23,4 +23,8 @@ export default {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  metered: {
+    apiKey: process.env.METERED_API_KEY,
+    appName: process.env.METERED_APP_NAME,
+  },
 };
