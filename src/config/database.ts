@@ -9,7 +9,7 @@ try {
     dns.setDefaultResultOrder('ipv4first');
   }
 } catch {
-  // Graceful fallback if runtime environment restricts custom DNS server setup
+  // Graceful fallback if runtime environment restricts custom DNS server 
 }
 
 const connectDB = async () => {
