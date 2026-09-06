@@ -4,6 +4,8 @@ export type IUser = {
   password?: string;
   profileImage?: string;
   role: 'admin' | 'user';
+  isOnline?: boolean;
+  lastSeen?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 };

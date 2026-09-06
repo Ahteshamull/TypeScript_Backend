@@ -10,6 +10,8 @@ const userSchema = new Schema<IUser>(
     password: { type: String, required: true, select: false },
     profileImage: { type: String },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
+    isOnline: { type: Boolean, default: false },
+    lastSeen: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

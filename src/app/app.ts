@@ -1,10 +1,13 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
-import path from 'path';
+import os from 'os';
+import mongoose from 'mongoose';
 import router from './routes';
 import globalErrorHandler from '../shared/middlewares/globalErrorHandler';
+import { generateDashboardHtml } from '../shared/utils/dashboardTemplate';
 
 const app: Application = express();
 
@@ -25,6 +28,9 @@ app.use(
   })
 );
 
+// Response Compression (Gzip/Brotli)
+app.use(compression());
+
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -36,20 +42,51 @@ app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static assets
-app.use(express.static(path.join(process.cwd(), 'public')));
+// Live API Hits Counter
+let totalApiHits = 0;
 
-// Application Routes
-app.use('/api/v1', router);
-
-// Root Endpoint
-app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to the Backend API!');
+// Request counter middleware
+app.use((req, res, next) => {
+  totalApiHits++;
+  next();
 });
 
-// Serve test HTML client
-app.get('/test-chat', (req: Request, res: Response) => {
-  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
+// Root Endpoint - Live System & Performance Metrics Dashboard
+app.get('/', (req: Request, res: Response) => {
+  const memoryUsage = process.memoryUsage();
+  const totalSystemMem = os.totalmem();
+  const freeSystemMem = os.freemem();
+  const usedSystemMem = totalSystemMem - freeSystemMem;
+
+  const cpus = os.cpus();
+  const cpuModel = cpus.length > 0 ? cpus[0].model : 'Unknown';
+  const cpuCores = cpus.length;
+  const isDbConnected = mongoose.connection.readyState === 1;
+
+  const html = generateDashboardHtml({
+    totalApiHits,
+    cpuCores,
+    cpuModel,
+    arch: os.arch(),
+    platform: os.platform(),
+    osType: os.type(),
+    osRelease: os.release(),
+    nodeVersion: process.version,
+    processUptime: process.uptime(),
+    systemUptime: os.uptime(),
+    heapUsed: memoryUsage.heapUsed,
+    heapTotal: memoryUsage.heapTotal,
+    rss: memoryUsage.rss,
+    external: memoryUsage.external,
+    totalSystemMem,
+    usedSystemMem,
+    freeSystemMem,
+    dbStatus: isDbConnected ? 'Connected' : 'Disconnected',
+    dbColor: isDbConnected ? '#10b981' : '#ef4444',
+  });
+
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
 });
 
 // Global Error Handler
