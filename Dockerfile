@@ -33,9 +33,6 @@ RUN npm install --omit=dev
 # Copy compiled dist folder from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Copy the frontend static assets (so the test chat works in production)
-COPY public/ ./public/
-
 # Copy start.sh and make it executable, converting CRLF to LF for safety
 COPY start.sh ./
 RUN sed -i 's/\r$//' start.sh && chmod +x start.sh
